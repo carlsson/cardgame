@@ -4,15 +4,17 @@ require_once $root . "/cardgame.php";
 
 class DeckTestCase extends PHPUnit_Framework_TestCase {
 
+    public function setUp(){
+        $this->deck = new Deck();
+    }
+
     public function testCreate(){
-        $deck = new Deck();
-        $this->assertEquals(52, count($deck->cards));
+        $this->assertEquals(52, count($this->deck->cards));
     }
 
     public function testDeal(){
-        $deck = new Deck();
-        $card = $deck->deal();
-        $this->assertEquals(51, count($deck->cards));
+        $card = $this->deck->deal();
+        $this->assertEquals(51, count($this->deck->cards));
     }
 }
 
@@ -36,6 +38,13 @@ class GameTestCase extends PHPUnit_Framework_TestCase {
 class XMLRendererTestCase extends PHPUnit_Framework_TestCase {
 
     public function testRender(){
-
+        $game = new Game(new Deck());
+        $player = new Player("test");
+        $player->give(new Card("10", "H"));
+        $game->addPlayer($player);
+        $renderer = new XMLRenderer($game);
+        $xml = $renderer->render();
+        $trimmed_xml = preg_replace('/^\s+|\n|\r|\s+$/m', '', $xml);
+        $this->assertEquals('<?xml version="1.0"?><game><player name="test"><card rank="10" suit="H"/></player></game>', $trimmed_xml);
     }
 }

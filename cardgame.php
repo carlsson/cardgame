@@ -13,6 +13,17 @@ class Player{
     }
 }
 
+class Card{
+
+    public $suit;
+    public $rank;
+
+    public function __construct($rank, $suit){
+        $this->rank = $rank;
+        $this->suit = $suit;
+    }
+}
+
 class Deck{
 
     protected $ranks = array("2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A");
@@ -27,8 +38,7 @@ class Deck{
         $this->cards = array();
         foreach($this->ranks as $rank){
             foreach($this->suits as $suit){
-                $card = sprintf("%s%s", $rank, $suit);
-                array_push($this->cards, $card);
+                array_push($this->cards, new Card($rank, $suit));
             }
         }
     }
@@ -38,9 +48,6 @@ class Deck{
     }
 
     public function deal(){
-        if(empty($this->cards)){
-            return Null;
-        }
         return array_shift($this->cards);
     }
 }
@@ -82,20 +89,24 @@ class XMLRenderer{
     }
 
     function render(){
-        $this->xml = new SimpleXMLElement('<xml/>');
-        $this->addPlayers($game->players);
-        return $xml;
+        $this->xml = new SimpleXMLElement('<game/>');
+        $this->addPlayers();
+        return $this->xml->asXml();
     }
 
-    private function addPlayers($players){
-        $track = $this->xml->addChild('player');
+    private function addPlayers(){
+        foreach($this->game->players as $player){
+            $this->playerxml = $this->xml->addChild('player');
+            $this->playerxml->addAttribute('name', $player->name);
+            $this->addCards($player);
+        }
     }
 
-    private function addPlayer($player){
-
-    }
-
-    private function addCards(){
-
+    private function addCards($player){
+        foreach($player->hand as $card){
+            $cardxml = $this->playerxml->addChild('card');
+            $cardxml->addAttribute("rank", $card->rank);
+            $cardxml->addAttribute("suit", $card->suit);
+        }
     }
 }
